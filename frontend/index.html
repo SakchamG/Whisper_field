@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whisper Field - Anonymous Whispers</title>
+    <style>
+        /* CSS Reset & Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0c0c1d;
+            --card-glass: rgba(20, 20, 40, 0.85);
+            --primary-purple: #9d4edd;
+            --glow-accent: #c77dff;
+            --text-light: #f8f9fa;
+            --text-muted: #adb5bd;
+            --border-glow: rgba(157, 78, 221, 0.3);
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Cosmic Background */
+        #cosmic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        .moon {
+            position: absolute;
+            top: 10%;
+            right: 10%;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at 30% 30%, #f8f9fa, #adb5bd 70%);
+            border-radius: 50%;
+            box-shadow: 0 0 40px rgba(248, 249, 250, 0.3);
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .mountains {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(to top, #0a0a18, transparent);
+            z-index: -1;
+        }
+
+        /* Animations */
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(0) translateX(20px); }
+            75% { transform: translateY(20px) translateX(10px); }
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { box-shadow: 0 0 20px var(--border-glow); }
+            50% { box-shadow: 0 0 30px var(--glow-accent); }
+        }
+
+        /* Header */
+        .header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            background: rgba(12, 12, 29, 0.7);
+            border-bottom: 1px solid var(--border-glow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary-purple), var(--glow-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--text-light);
+            background: rgba(157, 78, 221, 0.1);
+            border: 1px solid var(--border-glow);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            letter-spacing: 3px;
+        }
+
+        /* Browse Page - Whisper Grid */
+        .whispers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 1100px) {
+            .whispers-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Whisper Card */
+        .whisper-card {
+            background: var(--card-glass);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid var(--border-glow);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .whisper-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-purple);
+            animation: glow-pulse 2s infinite;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .anonymous-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-purple), var(--bg-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--text-light);
+        }
+
+        .topic-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        /* Original topics */
+        .topic-confession { background: rgba(157, 78, 221, 0.2); color: #c77dff; }
+        .topic-life { background: rgba(0, 200, 255, 0.2); color: #00c8ff; }
+        .topic-secrets { background: rgba(255, 100, 100, 0.2); color: #ff6464; }
+        .topic-advice { background: rgba(100, 255, 100, 0.2); color: #64ff64; }
+        .topic-love { background: rgba(255, 100, 200, 0.2); color: #ff64c8; }
+        .topic-random { background: rgba(200, 200, 100, 0.2); color: #c8c864; }
+
+        /* New topics */
+        .topic-series-movies { background: rgba(255, 152, 0, 0.2); color: #ff9800; }
+        .topic-politically-incorrect { background: rgba(244, 67, 54, 0.2); color: #f44336; }
+        .topic-paranormal { background: rgba(156, 39, 176, 0.2); color: #9c27b0; }
+        .topic-health-fitness { background: rgba(76, 175, 80, 0.2); color: #4caf50; }
+        .topic-vent { background: rgba(96, 125, 139, 0.2); color: #607d8b; }
+        .topic-music { background: rgba(233, 30, 99, 0.2); color: #e91e63; }
+        .topic-fashion { background: rgba(0, 188, 212, 0.2); color: #00bcd4; }
+        .topic-gaming { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+        .topic-otaku-stuff { background: rgba(103, 58, 183, 0.2); color: #673ab7; }
+
+        .whisper-preview {
+            color: var(--text-light);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            max-height: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .whisper-preview::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(transparent, var(--card-glass));
+        }
+
+        .sensitive-blur {
+            filter: blur(8px);
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .sensitive-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            text-align: center;
+            padding: 2rem;
+            z-index: 2;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+
+        .sensitive-badge {
+            color: #ff6464;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .auto-delete {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        /* More Dropdown Styles */
+        .more-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .more-dropdown-content {
+            display: none;
+            position: absolute;
+            background: var(--card-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glow);
+            border-radius: 10px;
+            padding: 0.5rem;
+            z-index: 1000;
+            min-width: 200px;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+        }
+
+        .more-dropdown-content.show {
+            display: block;
+        }
+
+        .dropdown-topic-btn {
+            display: block;
+            width: 100%;
+            padding: 0.5rem 1rem;
+            margin: 0.2rem 0;
+            background: rgba(40, 40, 70, 0.7);
+            border: 1px solid var(--border-glow);
+            border-radius: 15px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        .dropdown-topic-btn:hover, .dropdown-topic-btn.active {
+            background: rgba(157, 78, 221, 0.3);
+            color: var(--glow-accent);
+            border-color: var(--primary-purple);
+        }
+
+        .more-button {
+            background: rgba(40, 40, 70, 0.7);
+            border: 1px solid var(--border-glow);
+            border-radius: 20px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .more-button:hover, .more-button.active {
+            background: rgba(157, 78, 221, 0.3);
+            color: var(--glow-accent);
+            border-color: var(--primary-purple);
+        }
+
+        .more-button::after {
+            content: '▼';
+            margin-left: 0.5rem;
+            font-size: 0.7rem;
+            transition: transform 0.3s;
+        }
+
+        .more-button.show::after {
+            transform: rotate(180deg);
+        }
+
+        /* Full Whisper View */
+        .full-whisper-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .full-view-header {
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(20px);
+            background: rgba(12, 12, 29, 0.9);
+            border-bottom: 1px solid var(--border-glow);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            margin: -2rem -2rem 2rem -2rem;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--border-glow);
+            color: var(--text-light);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            border-color: var(--primary-purple);
+            background: rgba(157, 78, 221, 0.1);
+        }
+
+        .full-whisper-card {
+            background: var(--card-glass);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid var(--border-glow);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            animation: glow-pulse 4s infinite;
+        }
+
+        .full-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin: 2rem 0;
+            color: var(--text-light);
+        }
+
+        .full-footer {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+        }
+
+        /* Sensitive Content Warning */
+        .sensitive-warning {
+            background: rgba(20, 20, 40, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            border: 2px solid #ff6464;
+            margin-bottom: 2rem;
+        }
+
+        .warning-icon {
+            font-size: 3rem;
+            color: #ff6464;
+            margin-bottom: 1rem;
+        }
+
+        .warning-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        /* Replies Section */
+        .replies-section {
+            background: var(--card-glass);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--border-glow);
+            margin-top: 2rem;
+        }
+
+        .replies-title {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-light);
+        }
+
+        .reply {
+            background: rgba(30, 30, 50, 0.5);
+            border-radius: 10px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            border-left: 3px solid var(--primary-purple);
+        }
+
+        .reply-content {
+            color: var(--text-light);
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .reply-footer {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Reply Input */
+        .reply-input-container {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .reply-textarea {
+            width: 100%;
+            background: rgba(30, 30, 50, 0.7);
+            border: 1px solid var(--border-glow);
+            border-radius: 10px;
+            padding: 1rem;
+            color: var(--text-light);
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: vertical;
+            min-height: 120px;
+            margin-bottom: 1rem;
+        }
+
+        .reply-textarea:focus {
+            outline: none;
+            border-color: var(--primary-purple);
+            box-shadow: 0 0 20px var(--border-glow);
+        }
+
+        .input-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .char-counter {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .human-verification {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .verification-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-purple);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-purple), var(--glow-accent));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(157, 78, 221, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--text-muted);
+        }
+
+        .btn-secondary:hover {
+            color: var(--text-light);
+            border-color: var(--text-light);
+        }
+
+        .btn-danger {
+            background: rgba(255, 100, 100, 0.2);
+            color: #ff6464;
+            border: 1px solid #ff6464;
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 100, 100, 0.3);
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-purple), var(--glow-accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(157, 78, 221, 0.5);
+            z-index: 1000;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 40px rgba(199, 125, 255, 0.8);
+        }
+
+        /* Post Whisper Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: var(--card-glass);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 90%;
+            max-width: 600px;
+            border: 1px solid var(--border-glow);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--text-light);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .whisper-textarea {
+            width: 100%;
+            background: rgba(30, 30, 50, 0.7);
+            border: 1px solid var(--border-glow);
+            border-radius: 10px;
+            padding: 1rem;
+            color: var(--text-light);
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 200px;
+        }
+
+        .topic-select {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(30, 30, 50, 0.7);
+            border: 1px solid var(--border-glow);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-family: inherit;
+        }
+
+        .sensitive-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-light);
+        }
+
+        /* Topic Filter */
+        .topic-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+
+        .topic-filter-btn {
+            padding: 0.5rem 1.5rem;
+            background: rgba(40, 40, 70, 0.7);
+            border: 1px solid var(--border-glow);
+            border-radius: 20px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .topic-filter-btn:hover, .topic-filter-btn.active {
+            background: rgba(157, 78, 221, 0.3);
+            color: var(--glow-accent);
+            border-color: var(--primary-purple);
+        }
+
+        /* Utility */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(20, 20, 40, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-purple);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--glow-accent);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                gap: 0.5rem;
+            }
+
+            .nav-link {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .whispers-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .full-view-header {
+                padding: 0.8rem 1rem;
+                margin: -1rem -1rem 1rem -1rem;
+            }
+
+            .fab {
+                bottom: 1rem;
+                right: 1rem;
+                width: 50px;
+                height: 50px;
+            }
+
+            .more-dropdown-content {
+                right: -50px;
+                min-width: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cosmic Background -->
+    <div id="cosmic-bg">
+        <div class="moon"></div>
+        <div class="mountains"></div>
+    </div>
+
+    <!-- Global Header -->
+    <header class="header">
+        <div class="logo" id="home-button">WHISPER FIELD</div>
+        <nav class="nav-links">
+            <a href="#" class="nav-link active" id="nav-browse">BROWSE WHISPERS</a>
+        </nav>
+    </header>
+
+    <!-- Page 1: Browse Whispers -->
+    <main id="browse-page" class="container">
+        <h1 class="page-title">RECENT WHISPERS</h1>
+
+        <!-- Topic Filter with More Dropdown -->
+        <div class="topic-filter" id="topic-filter">
+            <button class="topic-filter-btn active" data-topic="all">ALL</button>
+            <button class="topic-filter-btn" data-topic="confession">CONFESSION</button>
+            <button class="topic-filter-btn" data-topic="life">LIFE</button>
+            <button class="topic-filter-btn" data-topic="secrets">SECRETS</button>
+            <button class="topic-filter-btn" data-topic="advice">ADVICE</button>
+
+            <!-- More Dropdown -->
+            <div class="more-dropdown">
+                <button class="more-button" id="more-btn">MORE</button>
+                <div class="more-dropdown-content" id="more-dropdown">
+                    <button class="dropdown-topic-btn" data-topic="love">LOVE</button>
+                    <button class="dropdown-topic-btn" data-topic="series-movies">SERIES/MOVIES</button>
+                    <button class="dropdown-topic-btn" data-topic="politically-incorrect">POLITICALLY INCORRECT</button>
+                    <button class="dropdown-topic-btn" data-topic="paranormal">PARANORMAL</button>
+                    <button class="dropdown-topic-btn" data-topic="health-fitness">HEALTH/FITNESS</button>
+                    <button class="dropdown-topic-btn" data-topic="vent">VENT</button>
+                    <button class="dropdown-topic-btn" data-topic="music">MUSIC</button>
+                    <button class="dropdown-topic-btn" data-topic="fashion">FASHION</button>
+                    <button class="dropdown-topic-btn" data-topic="gaming">GAMING</button>
+                    <button class="dropdown-topic-btn" data-topic="otaku-stuff">OTAKU STUFF</button>
+                    <button class="dropdown-topic-btn" data-topic="random">RANDOM</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Whisper Grid -->
+        <div class="whispers-grid" id="whispers-grid">
+            <!-- Whisper cards will be inserted here by JavaScript -->
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading" style="text-align: center; color: var(--text-muted); display: none;">
+            Loading whispers...
+        </div>
+    </main>
+
+    <!-- Page 2: Full Whisper View -->
+    <div id="whisper-page" class="container hidden">
+        <div class="full-whisper-container">
+            <!-- Sticky Top Bar -->
+            <div class="full-view-header">
+                <button class="back-button" id="back-button">
+                    ← Back to Browse
+                </button>
+                <div class="topic-badge" id="full-topic-badge">CONFESSION</div>
+                <div class="auto-delete">
+                    Auto-deletes in <span id="delete-hours">48</span>h
+                </div>
+            </div>
+
+            <!-- Sensitive warning will be inserted here if needed -->
+            <div class="full-whisper-card">
+                <div class="card-header">
+                    <div class="anonymous-icon">?</div>
+                    <div class="topic-badge topic-confession" id="full-topic">CONFESSION</div>
+                </div>
+
+                <div class="full-content" id="full-whisper-content">
+                    <!-- Full content will be inserted here -->
+                </div>
+
+                <div class="full-footer">
+                    <div class="footer-left">
+                        <div class="timestamp">🕒 <span id="full-timestamp">4h ago</span></div>
+                        <div class="replies-count">💬 <span id="full-replies-count">3</span> replies</div>
+                    </div>
+                    <div class="footer-right">
+                        <div class="sensitive-badge hidden" id="sensitive-indicator">
+                            ⚠️ SENSITIVE CONTENT
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Replies Section -->
+            <div class="replies-section">
+                <h3 class="replies-title">💬 REPLIES</h3>
+                <div id="replies-container">
+                    <!-- Replies will be inserted here -->
+                </div>
+
+                <!-- Reply Input -->
+                <div class="reply-input-container">
+                    <textarea class="reply-textarea" placeholder="Write an anonymous reply..." maxlength="500"></textarea>
+                    <div class="input-footer">
+                        <div class="char-counter"><span id="reply-chars">0</span>/500</div>
+                        <div class="human-verification">
+                            <input type="checkbox" id="human-check" class="verification-checkbox">
+                            <label for="human-check">I am human</label>
+                        </div>
+                        <button class="btn btn-primary" id="submit-reply">POST REPLY</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab" id="fab">+</button>
+
+    <!-- Post Whisper Modal -->
+    <div class="modal-overlay" id="post-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">POST A WHISPER</h2>
+                <button class="close-modal" id="close-modal">&times;</button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">YOUR WHISPER</label>
+                <textarea class="whisper-textarea" id="new-whisper" placeholder="Share your thoughts anonymously..." maxlength="1000"></textarea>
+                <div class="char-counter" style="text-align: right; margin-top: 0.5rem;">
+                    <span id="whisper-chars">0</span>/1000
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">TOPIC</label>
+                <select class="topic-select" id="whisper-topic">
+                    <option value="confession">Confession</option>
+                    <option value="life">Life</option>
+                    <option value="secrets">Secrets</option>
+                    <option value="advice">Advice</option>
+                    <option value="love">Love</option>
+                    <option value="series-movies">Series/Movies</option>
+                    <option value="politically-incorrect">Politically Incorrect</option>
+                    <option value="paranormal">Paranormal</option>
+                    <option value="health-fitness">Health/Fitness</option>
+                    <option value="vent">Vent</option>
+                    <option value="music">Music</option>
+                    <option value="fashion">Fashion</option>
+                    <option value="gaming">Gaming</option>
+                    <option value="otaku-stuff">Otaku Stuff</option>
+                    <option value="random">Random</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="sensitive-checkbox">
+                    <input type="checkbox" id="sensitive-toggle-modal">
+                    Mark as sensitive content
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label class="human-verification">
+                    <input type="checkbox" id="post-human-check" class="verification-checkbox">
+                    I am human
+                </label>
+            </div>
+
+            <button class="btn btn-primary" id="submit-whisper" style="width: 100%; padding: 1rem;">POST ANONYMOUSLY</button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // API Base URL
+        const API_BASE_URL = '/api';
+
+        // DOM Elements
+        const browsePage = document.getElementById('browse-page');
+        const whisperPage = document.getElementById('whisper-page');
+        const whispersGrid = document.getElementById('whispers-grid');
+        const fab = document.getElementById('fab');
+        const postModal = document.getElementById('post-modal');
+        const closeModal = document.getElementById('close-modal');
+        const newWhisperTextarea = document.getElementById('new-whisper');
+        const whisperChars = document.getElementById('whisper-chars');
+        const replyTextarea = document.querySelector('.reply-textarea');
+        const replyChars = document.getElementById('reply-chars');
+        const submitReplyBtn = document.getElementById('submit-reply');
+        const submitWhisperBtn = document.getElementById('submit-whisper');
+        const fullWhisperContent = document.getElementById('full-whisper-content');
+        const repliesContainer = document.getElementById('replies-container');
+        const sensitiveIndicator = document.getElementById('sensitive-indicator');
+        const deleteHours = document.getElementById('delete-hours');
+        const backButton = document.getElementById('back-button');
+        const homeButton = document.getElementById('home-button');
+        const topicFilter = document.getElementById('topic-filter');
+        const loadingIndicator = document.getElementById('loading');
+        const moreBtn = document.getElementById('more-btn');
+        const moreDropdown = document.getElementById('more-dropdown');
+
+        // State
+        let currentWhisper = null;
+        let currentTopic = 'all';
+        let isSensitiveContentHidden = false;
+        let lastUpdateTime = null;
+        let autoReloadInterval = null;
+        let revealedSensitiveCards = new Set(); // Track which cards have been revealed
+
+        // Initialize cosmic background
+        function initCosmicBackground() {
+            const bg = document.getElementById('cosmic-bg');
+            for (let i = 0; i < 150; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.opacity = Math.random() * 0.5 + 0.2;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.animationDuration = `${Math.random() * 4 + 2}s`;
+                bg.appendChild(star);
+            }
+        }
+
+        // Format timestamp
+        function formatTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffHours < 1) {
+                return 'Just now';
+            } else if (diffHours < 24) {
+                return `${diffHours}h ago`;
+            } else if (diffDays < 7) {
+                return `${diffDays}d ago`;
+            } else {
+                return date.toLocaleDateString();
+            }
+        }
+
+        // Calculate remaining hours
+        function getRemainingHours(createdAt) {
+            const created = new Date(createdAt);
+            const now = new Date();
+            const diffMs = now - created;
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const remaining = 48 - diffHours;
+            return Math.max(0, remaining);
+        }
+
+        // Format topic name for display
+        function formatTopicName(topic) {
+            return topic.split('-').map(word => word.toUpperCase()).join('/');
+        }
+
+        // Check for updates from backend - FIXED to include current topic
+        async function checkForUpdates() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/check-updates?last_update=${encodeURIComponent(lastUpdateTime || '')}&topic=${encodeURIComponent(currentTopic)}`);
+                const data = await response.json();
+
+                if (data.success && data.has_updates) {
+                    // Data has changed, refresh whispers with current topic
+                    fetchWhispers(currentTopic);
+                    lastUpdateTime = data.last_update;
+                }
+            } catch (error) {
+                console.error('Error checking updates:', error);
+            }
+        }
+
+        // Start auto-reload
+        function startAutoReload() {
+            if (autoReloadInterval) clearInterval(autoReloadInterval);
+            
+            autoReloadInterval = setInterval(() => {
+                if (!postModal.style.display || postModal.style.display === 'none') {
+                    checkForUpdates();
+                }
+            }, 2000); // Check every 2 seconds
+        }
+
+        // Stop auto-reload
+        function stopAutoReload() {
+            if (autoReloadInterval) {
+                clearInterval(autoReloadInterval);
+                autoReloadInterval = null;
+            }
+        }
+
+        // Fetch whispers from backend
+        async function fetchWhispers(topic = 'all') {
+            try {
+                loadingIndicator.style.display = 'block';
+                const response = await fetch(`${API_BASE_URL}/whispers?topic=${topic}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    lastUpdateTime = data.last_update;
+                    currentTopic = topic; // Update current topic state
+                    renderWhispers(data.data);
+                    
+                    // Update active button in UI
+                    updateActiveTopicButton(topic);
+                } else {
+                    console.error('Failed to fetch whispers:', data.error);
+                    whispersGrid.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1; padding: 2rem;">Failed to load whispers</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching whispers:', error);
+                whispersGrid.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1; padding: 2rem;">Error loading whispers</p>';
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        // Update active topic button in UI
+        function updateActiveTopicButton(topic) {
+            // Remove active class from all topic buttons
+            document.querySelectorAll('.topic-filter-btn, .dropdown-topic-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to the current topic button
+            const activeBtn = document.querySelector(`[data-topic="${topic}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            } else {
+                // If topic is from dropdown, also activate "ALL" button
+                document.querySelector('.topic-filter-btn[data-topic="all"]').classList.add('active');
+            }
+        }
+
+        // Fetch a single whisper
+        async function fetchWhisper(id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/whispers/${id}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    return data.data;
+                } else {
+                    console.error('Failed to fetch whisper:', data.error);
+                    return null;
+                }
+            } catch (error) {
+                console.error('Error fetching whisper:', error);
+                return null;
+            }
+        }
+
+        // Render whisper cards
+        function renderWhispers(whispers) {
+            if (whispers.length === 0) {
+                whispersGrid.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1; padding: 2rem;">No whispers found for this topic</p>';
+                return;
+            }
+
+            whispersGrid.innerHTML = '';
+
+            whispers.forEach(whisper => {
+                const card = document.createElement('div');
+                card.className = 'whisper-card';
+                card.dataset.id = whisper.id;
+
+                const preview = whisper.content.length > 150
+                    ? whisper.content.substring(0, 150) + '...'
+                    : whisper.content;
+
+                const remainingHours = getRemainingHours(whisper.created_at);
+                
+                // Check if this card has already been revealed
+                const isRevealed = revealedSensitiveCards.has(whisper.id);
+
+                card.innerHTML = `
+                    ${whisper.is_sensitive && !isRevealed ? `
+                        <div class="sensitive-overlay" data-whisper-id="${whisper.id}">
+                            <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">⚠️ SENSITIVE CONTENT</div>
+                            <p style="font-size: 0.9rem; margin-bottom: 1rem;">This whisper contains content that may be distressing.</p>
+                            <button class="btn btn-secondary reveal-sensitive-btn" data-whisper-id="${whisper.id}">
+                                REVEAL CONTENT
+                            </button>
+                        </div>
+                    ` : ''}
+
+                    <div class="card-header">
+                        <div class="anonymous-icon">?</div>
+                        <div class="topic-badge topic-${whisper.topic}">${formatTopicName(whisper.topic)}</div>
+                    </div>
+                    <div class="whisper-preview ${whisper.is_sensitive && !isRevealed ? 'sensitive-blur' : ''}">
+                        ${preview}
+                    </div>
+                    <div class="card-footer">
+                        <div class="footer-left">
+                            <div class="timestamp">🕒 ${formatTimeAgo(whisper.created_at)}</div>
+                        </div>
+                        <div class="footer-right">
+                            ${whisper.is_sensitive ? '<div class="sensitive-badge">⚠️ SENSITIVE</div>' : ''}
+                            <div class="auto-delete">
+                                ${remainingHours}h left
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Add click handler for the card (but not for the reveal button)
+                card.addEventListener('click', (e) => {
+                    // Don't open whisper if clicking the reveal button
+                    if (!e.target.classList.contains('reveal-sensitive-btn')) {
+                        openWhisper(whisper.id);
+                    }
+                });
+
+                // Add event listener for reveal button if present
+                const revealBtn = card.querySelector('.reveal-sensitive-btn');
+                if (revealBtn) {
+                    revealBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        revealSensitiveContent(whisper.id);
+                    });
+                }
+
+                whispersGrid.appendChild(card);
+            });
+        }
+
+        // Setup More Dropdown
+        function setupMoreDropdown() {
+            moreBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                moreDropdown.classList.toggle('show');
+                moreBtn.classList.toggle('show');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', () => {
+                moreDropdown.classList.remove('show');
+                moreBtn.classList.remove('show');
+            });
+
+            // Handle dropdown topic clicks
+            moreDropdown.addEventListener('click', (e) => {
+                if (e.target.classList.contains('dropdown-topic-btn')) {
+                    e.stopPropagation();
+                    const topic = e.target.dataset.topic;
+
+                    // Update current topic and fetch whispers
+                    currentTopic = topic;
+                    fetchWhispers(currentTopic);
+
+                    // Close dropdown
+                    moreDropdown.classList.remove('show');
+                    moreBtn.classList.remove('show');
+                }
+            });
+        }
+
+        // Reveal sensitive content - FIXED VERSION
+        function revealSensitiveContent(id) {
+            revealedSensitiveCards.add(id);
+            
+            const card = document.querySelector(`.whisper-card[data-id="${id}"]`);
+            if (card) {
+                const overlay = card.querySelector('.sensitive-overlay');
+                const preview = card.querySelector('.whisper-preview');
+
+                if (overlay) {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => {
+                        if (overlay.parentNode === card) {
+                            overlay.remove();
+                        }
+                    }, 300);
+                }
+                if (preview) {
+                    preview.classList.remove('sensitive-blur');
+                }
+            }
+        }
+
+        // Open full whisper view
+        async function openWhisper(id) {
+            const whisper = await fetchWhisper(id);
+            if (!whisper) return;
+
+            currentWhisper = whisper;
+            isSensitiveContentHidden = whisper.is_sensitive;
+
+            // Update content
+            fullWhisperContent.textContent = whisper.content;
+
+            // Update topic badge
+            const topicBadge = document.querySelector('.full-whisper-card .topic-badge');
+            topicBadge.className = `topic-badge topic-${whisper.topic}`;
+            topicBadge.textContent = formatTopicName(whisper.topic);
+
+            // Update full view header topic
+            document.getElementById('full-topic-badge').textContent = formatTopicName(whisper.topic);
+
+            // Update timestamp
+            document.getElementById('full-timestamp').textContent = formatTimeAgo(whisper.created_at);
+
+            // Update replies count
+            document.getElementById('full-replies-count').textContent = whisper.replies_count || 0;
+
+            // Update sensitive indicator
+            sensitiveIndicator.classList.toggle('hidden', !whisper.is_sensitive);
+
+            // Update remaining hours
+            const remainingHours = getRemainingHours(whisper.created_at);
+            document.getElementById('delete-hours').textContent = remainingHours;
+
+            // Fetch and render replies
+            await fetchReplies(id);
+
+            // Show sensitive warning if needed
+            if (whisper.is_sensitive) {
+                showSensitiveWarning();
+            } else {
+                hideSensitiveWarning();
+            }
+
+            // Switch pages
+            browsePage.classList.add('hidden');
+            whisperPage.classList.remove('hidden');
+            stopAutoReload();
+        }
+
+        // Fetch replies
+        async function fetchReplies(whisperId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/whispers/${whisperId}/replies`);
+                const data = await response.json();
+
+                if (data.success) {
+                    renderReplies(data.data);
+                } else {
+                    console.error('Failed to fetch replies:', data.error);
+                    renderReplies([]);
+                }
+            } catch (error) {
+                console.error('Error fetching replies:', error);
+                renderReplies([]);
+            }
+        }
+
+        // Show sensitive content warning
+        function showSensitiveWarning() {
+            const warningHTML = `
+                <div class="sensitive-warning">
+                    <div class="warning-icon">⚠️</div>
+                    <h2>CONTENT WARNING</h2>
+                    <p>This whisper contains sensitive content that some may find distressing.</p>
+                    <div class="warning-buttons">
+                        <button class="btn btn-danger" id="view-sensitive">CONTINUE READING</button>
+                        <button class="btn btn-secondary" id="go-back">GO BACK</button>
+                    </div>
+                </div>
+            `;
+
+            const container = document.querySelector('.full-whisper-container');
+            const existingWarning = container.querySelector('.sensitive-warning');
+            if (existingWarning) existingWarning.remove();
+
+            container.insertAdjacentHTML('afterbegin', warningHTML);
+
+            document.getElementById('view-sensitive').addEventListener('click', () => {
+                isSensitiveContentHidden = false;
+                hideSensitiveWarning();
+            });
+
+            document.getElementById('go-back').addEventListener('click', () => {
+                browsePage.classList.remove('hidden');
+                whisperPage.classList.add('hidden');
+                startAutoReload();
+            });
+        }
+
+        // Hide sensitive warning
+        function hideSensitiveWarning() {
+            const warning = document.querySelector('.sensitive-warning');
+            if (warning) warning.remove();
+        }
+
+        // Render replies
+        function renderReplies(replies) {
+            repliesContainer.innerHTML = '';
+
+            if (replies.length === 0) {
+                repliesContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No replies yet. Be the first to respond.</p>';
+                return;
+            }
+
+            replies.forEach(reply => {
+                const replyElement = document.createElement('div');
+                replyElement.className = 'reply';
+                replyElement.innerHTML = `
+                    <div class="reply-content">${reply.content}</div>
+                    <div class="reply-footer">
+                        <div class="anonymous-indicator">Anonymous</div>
+                        <div class="timestamp">${formatTimeAgo(reply.created_at)}</div>
+                    </div>
+                `;
+                repliesContainer.appendChild(replyElement);
+            });
+        }
+
+        // Post a new whisper
+        async function postWhisper(content, topic, isSensitive) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/whispers`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content,
+                        topic,
+                        is_sensitive: isSensitive
+                    })
+                });
+
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error posting whisper:', error);
+                return { success: false, error: 'Failed to post whisper' };
+            }
+        }
+
+        // Post a reply
+        async function postReply(whisperId, content) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/whispers/${whisperId}/replies`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ content })
+                });
+
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error posting reply:', error);
+                return { success: false, error: 'Failed to post reply' };
+            }
+        }
+
+        // Character counters
+        newWhisperTextarea.addEventListener('input', (e) => {
+            whisperChars.textContent = e.target.value.length;
+        });
+
+        replyTextarea.addEventListener('input', (e) => {
+            replyChars.textContent = e.target.value.length;
+        });
+
+        // Submit reply
+        submitReplyBtn.addEventListener('click', async () => {
+            const content = replyTextarea.value.trim();
+            const humanCheck = document.getElementById('human-check').checked;
+
+            if (!content) {
+                alert('Please write a reply.');
+                return;
+            }
+
+            if (!humanCheck) {
+                alert('Please confirm you are human.');
+                return;
+            }
+
+            if (content.length > 500) {
+                alert('Reply is too long.');
+                return;
+            }
+
+            if (currentWhisper) {
+                const result = await postReply(currentWhisper.id, content);
+
+                if (result.success) {
+                    // Refresh replies
+                    await fetchReplies(currentWhisper.id);
+
+                    // Reset form
+                    replyTextarea.value = '';
+                    replyChars.textContent = '0';
+                    document.getElementById('human-check').checked = false;
+
+                    // Add visual feedback
+                    submitReplyBtn.textContent = 'REPLIED!';
+                    submitReplyBtn.style.background = 'linear-gradient(45deg, #64ff64, #00c800)';
+                    setTimeout(() => {
+                        submitReplyBtn.textContent = 'POST REPLY';
+                        submitReplyBtn.style.background = '';
+                    }, 2000);
+                } else {
+                    alert('Failed to post reply: ' + result.error);
+                }
+            }
+        });
+
+        // Post new whisper
+        submitWhisperBtn.addEventListener('click', async () => {
+            const content = newWhisperTextarea.value.trim();
+            const topic = document.getElementById('whisper-topic').value;
+            const sensitive = document.getElementById('sensitive-toggle-modal').checked;
+            const humanCheck = document.getElementById('post-human-check').checked;
+
+            if (!content) {
+                alert('Please write a whisper.');
+                return;
+            }
+
+            if (!humanCheck) {
+                alert('Please confirm you are human.');
+                return;
+            }
+
+            if (content.length > 1000) {
+                alert('Whisper is too long.');
+                return;
+            }
+
+            const result = await postWhisper(content, topic, sensitive);
+
+            if (result.success) {
+                // Reset form and close modal
+                newWhisperTextarea.value = '';
+                whisperChars.textContent = '0';
+                document.getElementById('whisper-topic').value = 'confession';
+                document.getElementById('sensitive-toggle-modal').checked = false;
+                document.getElementById('post-human-check').checked = false;
+                postModal.style.display = 'none';
+
+                // Add visual feedback
+                const originalText = submitWhisperBtn.textContent;
+                submitWhisperBtn.textContent = 'WHISPERED!';
+                submitWhisperBtn.style.background = 'linear-gradient(45deg, #64ff64, #00c800)';
+                setTimeout(() => {
+                    submitWhisperBtn.textContent = originalText;
+                    submitWhisperBtn.style.background = '';
+                }, 2000);
+                
+                // Auto-reload will pick up the new whisper in 2 seconds
+            } else {
+                alert('Failed to post whisper: ' + result.error);
+            }
+        });
+
+        // Topic filter - Fixed to properly filter by topic
+        topicFilter.addEventListener('click', (e) => {
+            if (e.target.classList.contains('topic-filter-btn') && !e.target.classList.contains('more-button')) {
+                const topic = e.target.dataset.topic;
+                
+                // Update current topic and fetch whispers
+                currentTopic = topic;
+                fetchWhispers(currentTopic);
+
+                // Close more dropdown if open
+                moreDropdown.classList.remove('show');
+                moreBtn.classList.remove('show');
+            }
+        });
+
+        // Back button
+        backButton.addEventListener('click', () => {
+            browsePage.classList.remove('hidden');
+            whisperPage.classList.add('hidden');
+            startAutoReload();
+        });
+
+        // FAB and modal handling
+        fab.addEventListener('click', () => {
+            postModal.style.display = 'flex';
+        });
+
+        closeModal.addEventListener('click', () => {
+            postModal.style.display = 'none';
+        });
+
+        postModal.addEventListener('click', (e) => {
+            if (e.target === postModal) {
+                postModal.style.display = 'none';
+            }
+        });
+
+        // Initialize
+        initCosmicBackground();
+        setupMoreDropdown();
+        fetchWhispers('all');
+        startAutoReload();
+    </script>
+</body>
+</html>
