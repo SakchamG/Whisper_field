@@ -204,6 +204,9 @@ def create_whisper():
     if not data or not data.get('content'):
         return jsonify({'success': False, 'error': 'Content required'}), 400
 
+    if not data.get('title'):
+        return jsonify({'success': False, 'error': 'Title required'}), 400
+
     whispers = load_data(WHISPERS_FILE)
     new_id = max([w['id'] for w in whispers], default=0) + 1
     
@@ -214,6 +217,7 @@ def create_whisper():
     
     whisper = {
         'id': new_id,
+        'title': data['title'].strip(),
         'content': data['content'].strip(),
         'topic': topic,
         'is_sensitive': data.get('is_sensitive', False),

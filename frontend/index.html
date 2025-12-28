@@ -237,13 +237,23 @@
         .topic-gaming { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
         .topic-otaku-stuff { background: rgba(103, 58, 183, 0.2); color: #673ab7; }
 
-        .whisper-preview {
+        .whisper-title {
+            font-size: 1.2rem;
+            font-weight: 700;
             color: var(--text-light);
+            margin-bottom: 0.8rem;
+            line-height: 1.4;
+            letter-spacing: 0.5px;
+        }
+
+        .whisper-preview {
+            color: var(--text-muted);
             line-height: 1.6;
             margin-bottom: 1rem;
-            max-height: 100px;
+            max-height: 80px;
             overflow: hidden;
             position: relative;
+            font-size: 0.95rem;
         }
 
         .whisper-preview::after {
@@ -252,7 +262,7 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 40px;
+            height: 30px;
             background: linear-gradient(transparent, var(--card-glass));
         }
 
@@ -431,6 +441,15 @@
             margin-bottom: 2rem;
             animation: glow-pulse 4s infinite;
             animation: slideIn 0.4s ease-out;
+        }
+
+        .full-whisper-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+            letter-spacing: 1px;
         }
 
         .full-content {
@@ -714,6 +733,18 @@
             letter-spacing: 1px;
         }
 
+        .whisper-title-input {
+            width: 100%;
+            background: rgba(30, 30, 50, 0.7);
+            border: 1px solid var(--border-glow);
+            border-radius: 10px;
+            padding: 0.8rem;
+            color: var(--text-light);
+            font-family: inherit;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
         .whisper-textarea {
             width: 100%;
             background: rgba(30, 30, 50, 0.7);
@@ -724,7 +755,7 @@
             font-family: inherit;
             font-size: 1rem;
             resize: vertical;
-            min-height: 200px;
+            min-height: 180px;
         }
 
         .topic-select {
@@ -840,6 +871,14 @@
                 right: -50px;
                 min-width: 180px;
             }
+
+            .whisper-title {
+                font-size: 1.1rem;
+            }
+
+            .full-whisper-title {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
@@ -923,6 +962,10 @@
                     <div class="topic-badge topic-confession" id="full-topic">CONFESSION</div>
                 </div>
 
+                <h1 class="full-whisper-title" id="full-whisper-title">
+                    <!-- Title will be inserted here -->
+                </h1>
+
                 <div class="full-content" id="full-whisper-content">
                     <!-- Full content will be inserted here -->
                 </div>
@@ -974,6 +1017,14 @@
             <div class="modal-header">
                 <h2 class="modal-title">POST A WHISPER</h2>
                 <button class="close-modal" id="close-modal">&times;</button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">TITLE</label>
+                <input type="text" class="whisper-title-input" id="whisper-title" placeholder="Give your whisper a title..." maxlength="100">
+                <div class="char-counter" style="text-align: right; margin-top: 0.2rem;">
+                    <span id="title-chars">0</span>/100
+                </div>
             </div>
 
             <div class="form-group">
@@ -1035,6 +1086,8 @@
         const fab = document.getElementById('fab');
         const postModal = document.getElementById('post-modal');
         const closeModal = document.getElementById('close-modal');
+        const whisperTitleInput = document.getElementById('whisper-title');
+        const titleChars = document.getElementById('title-chars');
         const newWhisperTextarea = document.getElementById('new-whisper');
         const whisperChars = document.getElementById('whisper-chars');
         const replyTextarea = document.getElementById('reply-textarea');
@@ -1043,6 +1096,7 @@
         const replyCharCounter = document.getElementById('reply-char-counter');
         const submitReplyBtn = document.getElementById('submit-reply');
         const submitWhisperBtn = document.getElementById('submit-whisper');
+        const fullWhisperTitle = document.getElementById('full-whisper-title');
         const fullWhisperContent = document.getElementById('full-whisper-content');
         const repliesContainer = document.getElementById('replies-container');
         const sensitiveIndicator = document.getElementById('sensitive-indicator');
@@ -1299,8 +1353,10 @@
                 card.className = 'whisper-card';
                 card.dataset.id = whisper.id;
 
-                const preview = whisper.content.length > 150
-                    ? whisper.content.substring(0, 150) + '...'
+                // Get title or use default
+                const title = whisper.title || 'Untitled Whisper';
+                const preview = whisper.content.length > 120
+                    ? whisper.content.substring(0, 120) + '...'
                     : whisper.content;
 
                 const remainingHours = getRemainingHours(whisper.created_at);
@@ -1321,6 +1377,9 @@
                     <div class="card-header">
                         <div class="anonymous-icon">?</div>
                         <div class="topic-badge topic-${whisper.topic}">${formatTopicName(whisper.topic)}</div>
+                    </div>
+                    <div class="whisper-title ${whisper.is_sensitive && !isRevealed ? 'sensitive-blur' : ''}">
+                        ${title}
                     </div>
                     <div class="whisper-preview ${whisper.is_sensitive && !isRevealed ? 'sensitive-blur' : ''}">
                         ${preview}
@@ -1392,6 +1451,7 @@
             const card = document.querySelector(`.whisper-card[data-id="${id}"]`);
             if (card) {
                 const overlay = card.querySelector('.sensitive-overlay');
+                const title = card.querySelector('.whisper-title');
                 const preview = card.querySelector('.whisper-preview');
 
                 if (overlay) {
@@ -1401,6 +1461,9 @@
                             overlay.remove();
                         }
                     }, 300);
+                }
+                if (title) {
+                    title.classList.remove('sensitive-blur');
                 }
                 if (preview) {
                     preview.classList.remove('sensitive-blur');
@@ -1426,7 +1489,8 @@
             // Update full view header topic
             document.getElementById('full-topic-badge').textContent = formatTopicName(whisper.topic);
 
-            // Update content
+            // Update title and content
+            fullWhisperTitle.textContent = whisper.title || 'Untitled Whisper';
             fullWhisperContent.textContent = whisper.content;
 
             // Update timestamp
@@ -1550,7 +1614,7 @@
         }
 
         // Post a new whisper
-        async function postWhisper(content, topic, isSensitive) {
+        async function postWhisper(title, content, topic, isSensitive) {
             try {
                 const response = await fetch(`${API_BASE_URL}/whispers`, {
                     method: 'POST',
@@ -1558,6 +1622,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
+                        title: title.trim(),
                         content,
                         topic,
                         is_sensitive: isSensitive
@@ -1592,6 +1657,10 @@
         }
 
         // Character counters
+        whisperTitleInput.addEventListener('input', (e) => {
+            titleChars.textContent = e.target.value.length;
+        });
+
         newWhisperTextarea.addEventListener('input', (e) => {
             whisperChars.textContent = e.target.value.length;
         });
@@ -1666,10 +1735,16 @@
 
         // Post new whisper
         submitWhisperBtn.addEventListener('click', async () => {
+            const title = whisperTitleInput.value.trim();
             const content = newWhisperTextarea.value.trim();
             const topic = document.getElementById('whisper-topic').value;
             const sensitive = document.getElementById('sensitive-toggle-modal').checked;
             const humanCheck = document.getElementById('post-human-check').checked;
+
+            if (!title) {
+                alert('Please give your whisper a title.');
+                return;
+            }
 
             if (!content) {
                 alert('Please write a whisper.');
@@ -1681,15 +1756,22 @@
                 return;
             }
 
+            if (title.length > 100) {
+                alert('Title is too long. Maximum 100 characters.');
+                return;
+            }
+
             if (content.length > 1000) {
                 alert('Whisper is too long.');
                 return;
             }
 
-            const result = await postWhisper(content, topic, sensitive);
+            const result = await postWhisper(title, content, topic, sensitive);
 
             if (result.success) {
                 // Reset form and close modal
+                whisperTitleInput.value = '';
+                titleChars.textContent = '0';
                 newWhisperTextarea.value = '';
                 whisperChars.textContent = '0';
                 document.getElementById('whisper-topic').value = 'confession';
