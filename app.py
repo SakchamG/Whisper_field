@@ -38,7 +38,7 @@ init_data()
 # 3. UTILS
 # ----------------------------------------------------------
 ALL_TOPICS = [
-    'confession', 'life', 'secrets', 'advice', 'love',
+    'confession', 'life', 'secrets', 'advice', 'relationship',  # Replaced love with relationship
     'series-movies', 'politically-incorrect', 'paranormal',
     'health-fitness', 'vent', 'music', 'fashion',
     'gaming', 'otaku-stuff', 'random'
@@ -99,11 +99,7 @@ cleanup_thread.start()
 # 4. STATIC FRONT-END ROUTES
 # ----------------------------------------------------------
 @app.route('/')
-def serve_landing():
-    return send_from_directory(FRONTEND_DIR, 'landingpage.html')
-
-@app.route('/index')
-def serve_board():
+def serve_index():
     return send_from_directory(FRONTEND_DIR, 'index.html')
 
 @app.route('/<path:path>')
@@ -243,6 +239,12 @@ def create_reply(id):
     if not data or not data.get('content'):
         return jsonify({'success': False, 'error': 'Content required'}), 400
 
+    # Check word count (max 150 words)
+    content = data['content'].strip()
+    word_count = len(content.split())
+    if word_count > 150:
+        return jsonify({'success': False, 'error': 'Reply too long. Maximum 150 words allowed.'}), 400
+
     whispers = load_data(WHISPERS_FILE)
     whisper = next((w for w in whispers if w['id'] == id), None)
     if not whisper:
@@ -253,7 +255,7 @@ def create_reply(id):
     reply = {
         'id': new_id,
         'whisper_id': id,
-        'content': data['content'].strip(),
+        'content': content,
         'created_at': datetime.utcnow().isoformat()
     }
     

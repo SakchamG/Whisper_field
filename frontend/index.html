@@ -88,6 +88,16 @@
             50% { box-shadow: 0 0 30px var(--glow-accent); }
         }
 
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         /* Header */
         .header {
             padding: 1.5rem 2rem;
@@ -125,6 +135,7 @@
             transition: color 0.3s;
             padding: 0.5rem 1rem;
             border-radius: 8px;
+            cursor: pointer;
         }
 
         .nav-link:hover, .nav-link.active {
@@ -138,6 +149,7 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
+            animation: fadeIn 0.5s ease-out;
         }
 
         .page-title {
@@ -172,6 +184,7 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            animation: slideIn 0.4s ease-out;
         }
 
         .whisper-card:hover {
@@ -207,15 +220,13 @@
             letter-spacing: 1px;
         }
 
-        /* Original topics */
+        /* Updated topics - replaced love with relationship */
         .topic-confession { background: rgba(157, 78, 221, 0.2); color: #c77dff; }
         .topic-life { background: rgba(0, 200, 255, 0.2); color: #00c8ff; }
         .topic-secrets { background: rgba(255, 100, 100, 0.2); color: #ff6464; }
         .topic-advice { background: rgba(100, 255, 100, 0.2); color: #64ff64; }
-        .topic-love { background: rgba(255, 100, 200, 0.2); color: #ff64c8; }
+        .topic-relationship { background: rgba(255, 100, 200, 0.2); color: #ff64c8; }
         .topic-random { background: rgba(200, 200, 100, 0.2); color: #c8c864; }
-
-        /* New topics */
         .topic-series-movies { background: rgba(255, 152, 0, 0.2); color: #ff9800; }
         .topic-politically-incorrect { background: rgba(244, 67, 54, 0.2); color: #f44336; }
         .topic-paranormal { background: rgba(156, 39, 176, 0.2); color: #9c27b0; }
@@ -312,6 +323,7 @@
             top: 100%;
             right: 0;
             margin-top: 0.5rem;
+            animation: fadeIn 0.2s ease-out;
         }
 
         .more-dropdown-content.show {
@@ -373,6 +385,7 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 2rem;
+            animation: fadeIn 0.4s ease-out;
         }
 
         .full-view-header {
@@ -387,6 +400,7 @@
             align-items: center;
             z-index: 100;
             margin: -2rem -2rem 2rem -2rem;
+            animation: slideIn 0.3s ease-out;
         }
 
         .back-button {
@@ -416,6 +430,7 @@
             padding: 2.5rem;
             margin-bottom: 2rem;
             animation: glow-pulse 4s infinite;
+            animation: slideIn 0.4s ease-out;
         }
 
         .full-content {
@@ -437,7 +452,7 @@
             padding-top: 1.5rem;
         }
 
-        /* Sensitive Content Warning */
+        /* Sensitive Content Warning (inside whisper) */
         .sensitive-warning {
             background: rgba(20, 20, 40, 0.95);
             backdrop-filter: blur(20px);
@@ -446,6 +461,7 @@
             text-align: center;
             border: 2px solid #ff6464;
             margin-bottom: 2rem;
+            animation: fadeIn 0.4s ease-out;
         }
 
         .warning-icon {
@@ -469,6 +485,7 @@
             padding: 2rem;
             border: 1px solid var(--border-glow);
             margin-top: 2rem;
+            animation: slideIn 0.5s ease-out;
         }
 
         .replies-title {
@@ -483,6 +500,7 @@
             padding: 1.2rem;
             margin-bottom: 1rem;
             border-left: 3px solid var(--primary-purple);
+            animation: slideIn 0.3s ease-out;
         }
 
         .reply-content {
@@ -538,6 +556,10 @@
             font-size: 0.9rem;
         }
 
+        .char-counter.warning {
+            color: #ff6464;
+        }
+
         .human-verification {
             display: flex;
             align-items: center;
@@ -573,6 +595,13 @@
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(157, 78, 221, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         .btn-secondary {
@@ -615,6 +644,7 @@
             z-index: 1000;
             transition: all 0.3s;
             border: none;
+            animation: fadeIn 0.5s ease-out;
         }
 
         .fab:hover {
@@ -635,6 +665,7 @@
             align-items: center;
             justify-content: center;
             z-index: 2000;
+            animation: fadeIn 0.3s ease-out;
         }
 
         .modal-content {
@@ -647,6 +678,7 @@
             border: 1px solid var(--border-glow);
             max-height: 90vh;
             overflow-y: auto;
+            animation: slideIn 0.4s ease-out;
         }
 
         .modal-header {
@@ -735,6 +767,14 @@
             background: rgba(157, 78, 221, 0.3);
             color: var(--glow-accent);
             border-color: var(--primary-purple);
+        }
+
+        /* Hidden Content */
+        .hidden-content {
+            filter: blur(10px);
+            user-select: none;
+            pointer-events: none;
+            opacity: 0.3;
         }
 
         /* Utility */
@@ -834,7 +874,7 @@
             <div class="more-dropdown">
                 <button class="more-button" id="more-btn">MORE</button>
                 <div class="more-dropdown-content" id="more-dropdown">
-                    <button class="dropdown-topic-btn" data-topic="love">LOVE</button>
+                    <button class="dropdown-topic-btn" data-topic="relationship">RELATIONSHIP</button>
                     <button class="dropdown-topic-btn" data-topic="series-movies">SERIES/MOVIES</button>
                     <button class="dropdown-topic-btn" data-topic="politically-incorrect">POLITICALLY INCORRECT</button>
                     <button class="dropdown-topic-btn" data-topic="paranormal">PARANORMAL</button>
@@ -862,7 +902,7 @@
 
     <!-- Page 2: Full Whisper View -->
     <div id="whisper-page" class="container hidden">
-        <div class="full-whisper-container">
+        <div class="full-whisper-container" id="whisper-container">
             <!-- Sticky Top Bar -->
             <div class="full-view-header">
                 <button class="back-button" id="back-button">
@@ -875,7 +915,9 @@
             </div>
 
             <!-- Sensitive warning will be inserted here if needed -->
-            <div class="full-whisper-card">
+            
+            <!-- Whisper content -->
+            <div class="full-whisper-card" id="whisper-content-card">
                 <div class="card-header">
                     <div class="anonymous-icon">?</div>
                     <div class="topic-badge topic-confession" id="full-topic">CONFESSION</div>
@@ -899,7 +941,7 @@
             </div>
 
             <!-- Replies Section -->
-            <div class="replies-section">
+            <div class="replies-section" id="replies-section">
                 <h3 class="replies-title">💬 REPLIES</h3>
                 <div id="replies-container">
                     <!-- Replies will be inserted here -->
@@ -907,9 +949,11 @@
 
                 <!-- Reply Input -->
                 <div class="reply-input-container">
-                    <textarea class="reply-textarea" placeholder="Write an anonymous reply..." maxlength="500"></textarea>
+                    <textarea class="reply-textarea" placeholder="Write an anonymous reply (max 150 words)..." maxlength="750" id="reply-textarea"></textarea>
                     <div class="input-footer">
-                        <div class="char-counter"><span id="reply-chars">0</span>/500</div>
+                        <div class="char-counter" id="reply-char-counter">
+                            <span id="reply-chars">0</span>/750 characters • <span id="reply-words">0</span>/150 words
+                        </div>
                         <div class="human-verification">
                             <input type="checkbox" id="human-check" class="verification-checkbox">
                             <label for="human-check">I am human</label>
@@ -947,7 +991,7 @@
                     <option value="life">Life</option>
                     <option value="secrets">Secrets</option>
                     <option value="advice">Advice</option>
-                    <option value="love">Love</option>
+                    <option value="relationship">Relationship</option>
                     <option value="series-movies">Series/Movies</option>
                     <option value="politically-incorrect">Politically Incorrect</option>
                     <option value="paranormal">Paranormal</option>
@@ -993,8 +1037,10 @@
         const closeModal = document.getElementById('close-modal');
         const newWhisperTextarea = document.getElementById('new-whisper');
         const whisperChars = document.getElementById('whisper-chars');
-        const replyTextarea = document.querySelector('.reply-textarea');
+        const replyTextarea = document.getElementById('reply-textarea');
         const replyChars = document.getElementById('reply-chars');
+        const replyWords = document.getElementById('reply-words');
+        const replyCharCounter = document.getElementById('reply-char-counter');
         const submitReplyBtn = document.getElementById('submit-reply');
         const submitWhisperBtn = document.getElementById('submit-whisper');
         const fullWhisperContent = document.getElementById('full-whisper-content');
@@ -1003,18 +1049,20 @@
         const deleteHours = document.getElementById('delete-hours');
         const backButton = document.getElementById('back-button');
         const homeButton = document.getElementById('home-button');
+        const navBrowse = document.getElementById('nav-browse');
         const topicFilter = document.getElementById('topic-filter');
         const loadingIndicator = document.getElementById('loading');
         const moreBtn = document.getElementById('more-btn');
         const moreDropdown = document.getElementById('more-dropdown');
+        const whisperContentCard = document.getElementById('whisper-content-card');
+        const repliesSection = document.getElementById('replies-section');
 
         // State
         let currentWhisper = null;
         let currentTopic = 'all';
-        let isSensitiveContentHidden = false;
         let lastUpdateTime = null;
         let autoReloadInterval = null;
-        let revealedSensitiveCards = new Set(); // Track which cards have been revealed
+        let revealedSensitiveCards = new Set();
 
         // Initialize cosmic background
         function initCosmicBackground() {
@@ -1033,19 +1081,20 @@
             }
         }
 
-        // Format timestamp - FIXED VERSION
+        // Count words in text
+        function countWords(text) {
+            return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+        }
+
+        // Format timestamp
         function formatTimeAgo(dateString) {
             try {
-                // Ensure dateString is properly formatted
                 let date;
                 if (dateString.includes('Z')) {
-                    // ISO string with Z
                     date = new Date(dateString);
                 } else if (dateString.includes('+')) {
-                    // ISO string with timezone
                     date = new Date(dateString);
                 } else {
-                    // Add timezone if missing
                     date = new Date(dateString + 'Z');
                 }
                 
@@ -1093,6 +1142,57 @@
             ).join('/').toUpperCase();
         }
 
+        // Reset whisper page state
+        function resetWhisperPage() {
+            // Remove any existing warning
+            const existingWarning = document.querySelector('.sensitive-warning');
+            if (existingWarning) existingWarning.remove();
+            
+            // Ensure content and replies are visible
+            whisperContentCard.classList.remove('hidden');
+            repliesSection.classList.remove('hidden');
+            
+            // Reset reply textarea
+            replyTextarea.value = '';
+            replyChars.textContent = '0';
+            replyWords.textContent = '0';
+            document.getElementById('human-check').checked = false;
+            replyCharCounter.classList.remove('warning');
+            submitReplyBtn.disabled = false;
+            submitReplyBtn.title = '';
+        }
+
+        // Smooth transition between pages
+        function smoothTransition(toPage) {
+            const fromPage = whisperPage.classList.contains('hidden') ? browsePage : whisperPage;
+            
+            // Add fade-out animation
+            fromPage.style.opacity = '0';
+            fromPage.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                fromPage.classList.add('hidden');
+                toPage.classList.remove('hidden');
+                toPage.style.opacity = '0';
+                toPage.style.transform = 'translateY(20px)';
+                
+                // Force reflow
+                toPage.offsetHeight;
+                
+                // Add fade-in animation
+                setTimeout(() => {
+                    toPage.style.opacity = '1';
+                    toPage.style.transform = 'translateY(0)';
+                    toPage.style.transition = 'opacity 0.4s ease-out, transform 0.4s ease-out';
+                }, 10);
+            }, 200);
+            
+            // Reset transition after animation
+            setTimeout(() => {
+                toPage.style.transition = '';
+            }, 600);
+        }
+
         // Check for updates from backend
         async function checkForUpdates() {
             try {
@@ -1100,7 +1200,6 @@
                 const data = await response.json();
 
                 if (data.success && data.has_updates) {
-                    // Data has changed, refresh whispers with current topic
                     fetchWhispers(currentTopic);
                     lastUpdateTime = data.last_update;
                 }
@@ -1117,7 +1216,7 @@
                 if (!postModal.style.display || postModal.style.display === 'none') {
                     checkForUpdates();
                 }
-            }, 2000); // Check every 2 seconds
+            }, 2000);
         }
 
         // Stop auto-reload
@@ -1137,10 +1236,8 @@
 
                 if (data.success) {
                     lastUpdateTime = data.last_update;
-                    currentTopic = topic; // Update current topic state
+                    currentTopic = topic;
                     renderWhispers(data.data);
-                    
-                    // Update active button in UI
                     updateActiveTopicButton(topic);
                 } else {
                     console.error('Failed to fetch whispers:', data.error);
@@ -1156,18 +1253,15 @@
 
         // Update active topic button in UI
         function updateActiveTopicButton(topic) {
-            // Remove active class from all topic buttons
             document.querySelectorAll('.topic-filter-btn, .dropdown-topic-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             
-            // Add active class to the current topic button
             const activeBtn = document.querySelector(`[data-topic="${topic}"]`);
             if (activeBtn) {
                 activeBtn.classList.add('active');
             }
             
-            // If no active button found, default to "all"
             if (!activeBtn && topic === 'all') {
                 document.querySelector('.topic-filter-btn[data-topic="all"]').classList.add('active');
             }
@@ -1211,8 +1305,6 @@
 
                 const remainingHours = getRemainingHours(whisper.created_at);
                 const timeAgo = formatTimeAgo(whisper.created_at);
-                
-                // Check if this card has already been revealed
                 const isRevealed = revealedSensitiveCards.has(whisper.id);
 
                 card.innerHTML = `
@@ -1246,9 +1338,8 @@
                     </div>
                 `;
 
-                // Add click handler for the card (but not for the reveal button)
+                // Add click handler for the card
                 card.addEventListener('click', (e) => {
-                    // Don't open whisper if clicking the reveal button
                     if (!e.target.classList.contains('reveal-sensitive-btn')) {
                         openWhisper(whisper.id);
                     }
@@ -1286,19 +1377,15 @@
                 if (e.target.classList.contains('dropdown-topic-btn')) {
                     e.stopPropagation();
                     const topic = e.target.dataset.topic;
-
-                    // Update current topic and fetch whispers
                     currentTopic = topic;
                     fetchWhispers(currentTopic);
-
-                    // Close dropdown
                     moreDropdown.classList.remove('show');
                     moreBtn.classList.remove('show');
                 }
             });
         }
 
-        // Reveal sensitive content
+        // Reveal sensitive content in card view
         function revealSensitiveContent(id) {
             revealedSensitiveCards.add(id);
             
@@ -1323,14 +1410,13 @@
 
         // Open full whisper view
         async function openWhisper(id) {
+            // Reset page state first
+            resetWhisperPage();
+            
             const whisper = await fetchWhisper(id);
             if (!whisper) return;
 
             currentWhisper = whisper;
-            isSensitiveContentHidden = whisper.is_sensitive;
-
-            // Update content
-            fullWhisperContent.textContent = whisper.content;
 
             // Update topic badge
             const topicBadge = document.querySelector('.full-whisper-card .topic-badge');
@@ -1340,7 +1426,10 @@
             // Update full view header topic
             document.getElementById('full-topic-badge').textContent = formatTopicName(whisper.topic);
 
-            // Update timestamp - FIXED
+            // Update content
+            fullWhisperContent.textContent = whisper.content;
+
+            // Update timestamp
             document.getElementById('full-timestamp').textContent = formatTimeAgo(whisper.created_at);
 
             // Update replies count
@@ -1353,20 +1442,70 @@
             const remainingHours = getRemainingHours(whisper.created_at);
             document.getElementById('delete-hours').textContent = remainingHours;
 
-            // Fetch and render replies
+            // Fetch replies
             await fetchReplies(id);
 
             // Show sensitive warning if needed
             if (whisper.is_sensitive) {
                 showSensitiveWarning();
-            } else {
-                hideSensitiveWarning();
             }
 
-            // Switch pages
-            browsePage.classList.add('hidden');
-            whisperPage.classList.remove('hidden');
+            // Switch pages with smooth transition
+            smoothTransition(whisperPage);
             stopAutoReload();
+        }
+
+        // Show sensitive content warning (inside whisper view)
+        function showSensitiveWarning() {
+            // Hide content and replies while showing warning
+            whisperContentCard.classList.add('hidden');
+            repliesSection.classList.add('hidden');
+
+            const warningHTML = `
+                <div class="sensitive-warning" id="sensitive-warning">
+                    <div class="warning-icon">⚠️</div>
+                    <h2>CONTENT WARNING</h2>
+                    <p>This whisper contains sensitive content that some may find distressing.</p>
+                    <div class="warning-buttons">
+                        <button class="btn btn-danger" id="view-sensitive">CONTINUE READING</button>
+                        <button class="btn btn-secondary" id="go-back">GO BACK</button>
+                    </div>
+                </div>
+            `;
+
+            const container = document.getElementById('whisper-container');
+            const existingWarning = container.querySelector('.sensitive-warning');
+            if (existingWarning) existingWarning.remove();
+
+            container.insertAdjacentHTML('afterbegin', warningHTML);
+
+            // Add fresh event listeners
+            document.getElementById('view-sensitive').addEventListener('click', () => {
+                revealContentAndReplies();
+            });
+
+            document.getElementById('go-back').addEventListener('click', () => {
+                smoothTransition(browsePage);
+                startAutoReload();
+            });
+        }
+
+        // Reveal content and replies (after warning accepted)
+        function revealContentAndReplies() {
+            const warning = document.getElementById('sensitive-warning');
+            if (warning) warning.remove();
+            
+            // Show content and replies with animation
+            whisperContentCard.classList.remove('hidden');
+            repliesSection.classList.remove('hidden');
+            
+            // Add animation
+            whisperContentCard.style.animation = 'none';
+            repliesSection.style.animation = 'none';
+            setTimeout(() => {
+                whisperContentCard.style.animation = 'slideIn 0.4s ease-out';
+                repliesSection.style.animation = 'slideIn 0.5s ease-out';
+            }, 10);
         }
 
         // Fetch replies
@@ -1385,44 +1524,6 @@
                 console.error('Error fetching replies:', error);
                 renderReplies([]);
             }
-        }
-
-        // Show sensitive content warning
-        function showSensitiveWarning() {
-            const warningHTML = `
-                <div class="sensitive-warning">
-                    <div class="warning-icon">⚠️</div>
-                    <h2>CONTENT WARNING</h2>
-                    <p>This whisper contains sensitive content that some may find distressing.</p>
-                    <div class="warning-buttons">
-                        <button class="btn btn-danger" id="view-sensitive">CONTINUE READING</button>
-                        <button class="btn btn-secondary" id="go-back">GO BACK</button>
-                    </div>
-                </div>
-            `;
-
-            const container = document.querySelector('.full-whisper-container');
-            const existingWarning = container.querySelector('.sensitive-warning');
-            if (existingWarning) existingWarning.remove();
-
-            container.insertAdjacentHTML('afterbegin', warningHTML);
-
-            document.getElementById('view-sensitive').addEventListener('click', () => {
-                isSensitiveContentHidden = false;
-                hideSensitiveWarning();
-            });
-
-            document.getElementById('go-back').addEventListener('click', () => {
-                browsePage.classList.remove('hidden');
-                whisperPage.classList.add('hidden');
-                startAutoReload();
-            });
-        }
-
-        // Hide sensitive warning
-        function hideSensitiveWarning() {
-            const warning = document.querySelector('.sensitive-warning');
-            if (warning) warning.remove();
         }
 
         // Render replies
@@ -1495,14 +1596,32 @@
             whisperChars.textContent = e.target.value.length;
         });
 
+        // Reply textarea with word limit
         replyTextarea.addEventListener('input', (e) => {
-            replyChars.textContent = e.target.value.length;
+            const text = e.target.value;
+            const wordCount = countWords(text);
+            const charCount = text.length;
+            
+            replyChars.textContent = charCount;
+            replyWords.textContent = wordCount;
+            
+            // Check word limit
+            if (wordCount > 150) {
+                replyCharCounter.classList.add('warning');
+                submitReplyBtn.disabled = true;
+                submitReplyBtn.title = 'Maximum 150 words allowed';
+            } else {
+                replyCharCounter.classList.remove('warning');
+                submitReplyBtn.disabled = false;
+                submitReplyBtn.title = '';
+            }
         });
 
         // Submit reply
         submitReplyBtn.addEventListener('click', async () => {
             const content = replyTextarea.value.trim();
             const humanCheck = document.getElementById('human-check').checked;
+            const wordCount = countWords(content);
 
             if (!content) {
                 alert('Please write a reply.');
@@ -1514,8 +1633,8 @@
                 return;
             }
 
-            if (content.length > 500) {
-                alert('Reply is too long.');
+            if (wordCount > 150) {
+                alert('Reply is too long. Maximum 150 words allowed.');
                 return;
             }
 
@@ -1529,6 +1648,7 @@
                     // Reset form
                     replyTextarea.value = '';
                     replyChars.textContent = '0';
+                    replyWords.textContent = '0';
                     document.getElementById('human-check').checked = false;
 
                     // Add visual feedback
@@ -1597,12 +1717,8 @@
         topicFilter.addEventListener('click', (e) => {
             if (e.target.classList.contains('topic-filter-btn') && !e.target.classList.contains('more-button')) {
                 const topic = e.target.dataset.topic;
-                
-                // Update current topic and fetch whispers
                 currentTopic = topic;
                 fetchWhispers(currentTopic);
-
-                // Close more dropdown if open
                 moreDropdown.classList.remove('show');
                 moreBtn.classList.remove('show');
             }
@@ -1610,9 +1726,36 @@
 
         // Back button
         backButton.addEventListener('click', () => {
-            browsePage.classList.remove('hidden');
-            whisperPage.classList.add('hidden');
+            smoothTransition(browsePage);
             startAutoReload();
+        });
+
+        // Browse whispers button (refresh)
+        navBrowse.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!whisperPage.classList.contains('hidden')) {
+                smoothTransition(browsePage);
+                startAutoReload();
+            } else {
+                // Already on browse page, refresh whispers
+                fetchWhispers(currentTopic);
+            }
+        });
+
+        // Home button (logo)
+        homeButton.addEventListener('click', () => {
+            if (!browsePage.classList.contains('hidden')) return;
+            
+            smoothTransition(browsePage);
+            startAutoReload();
+        });
+
+        // Handle browser back button
+        window.addEventListener('popstate', () => {
+            if (!whisperPage.classList.contains('hidden')) {
+                smoothTransition(browsePage);
+                startAutoReload();
+            }
         });
 
         // FAB and modal handling
