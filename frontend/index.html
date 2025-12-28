@@ -1033,41 +1033,67 @@
             }
         }
 
-        // Format timestamp
+        // Format timestamp - FIXED VERSION
         function formatTimeAgo(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const diffMs = now - date;
-            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-            const diffDays = Math.floor(diffHours / 24);
+            try {
+                // Ensure dateString is properly formatted
+                let date;
+                if (dateString.includes('Z')) {
+                    // ISO string with Z
+                    date = new Date(dateString);
+                } else if (dateString.includes('+')) {
+                    // ISO string with timezone
+                    date = new Date(dateString);
+                } else {
+                    // Add timezone if missing
+                    date = new Date(dateString + 'Z');
+                }
+                
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMinutes = Math.floor(diffMs / (1000 * 60));
+                const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                const diffDays = Math.floor(diffHours / 24);
 
-            if (diffHours < 1) {
-                return 'Just now';
-            } else if (diffHours < 24) {
-                return `${diffHours}h ago`;
-            } else if (diffDays < 7) {
-                return `${diffDays}d ago`;
-            } else {
-                return date.toLocaleDateString();
+                if (diffMinutes < 1) {
+                    return 'Just now';
+                } else if (diffMinutes < 60) {
+                    return `${diffMinutes}m ago`;
+                } else if (diffHours < 24) {
+                    return `${diffHours}h ago`;
+                } else if (diffDays < 7) {
+                    return `${diffDays}d ago`;
+                } else {
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                }
+            } catch (error) {
+                console.error('Error formatting time:', error, dateString);
+                return 'Recently';
             }
         }
 
         // Calculate remaining hours
         function getRemainingHours(createdAt) {
-            const created = new Date(createdAt);
-            const now = new Date();
-            const diffMs = now - created;
-            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-            const remaining = 48 - diffHours;
-            return Math.max(0, remaining);
+            try {
+                const date = new Date(createdAt.includes('Z') ? createdAt : createdAt + 'Z');
+                const now = new Date();
+                const diffMs = now - date;
+                const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                const remaining = 48 - diffHours;
+                return Math.max(0, remaining);
+            } catch (error) {
+                return 48;
+            }
         }
 
         // Format topic name for display
         function formatTopicName(topic) {
-            return topic.split('-').map(word => word.toUpperCase()).join('/');
+            return topic.split('-').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join('/').toUpperCase();
         }
 
-        // Check for updates from backend - FIXED to include current topic
+        // Check for updates from backend
         async function checkForUpdates() {
             try {
                 const response = await fetch(`${API_BASE_URL}/check-updates?last_update=${encodeURIComponent(lastUpdateTime || '')}&topic=${encodeURIComponent(currentTopic)}`);
@@ -1139,8 +1165,10 @@
             const activeBtn = document.querySelector(`[data-topic="${topic}"]`);
             if (activeBtn) {
                 activeBtn.classList.add('active');
-            } else {
-                // If topic is from dropdown, also activate "ALL" button
+            }
+            
+            // If no active button found, default to "all"
+            if (!activeBtn && topic === 'all') {
                 document.querySelector('.topic-filter-btn[data-topic="all"]').classList.add('active');
             }
         }
@@ -1182,6 +1210,7 @@
                     : whisper.content;
 
                 const remainingHours = getRemainingHours(whisper.created_at);
+                const timeAgo = formatTimeAgo(whisper.created_at);
                 
                 // Check if this card has already been revealed
                 const isRevealed = revealedSensitiveCards.has(whisper.id);
@@ -1206,7 +1235,7 @@
                     </div>
                     <div class="card-footer">
                         <div class="footer-left">
-                            <div class="timestamp">🕒 ${formatTimeAgo(whisper.created_at)}</div>
+                            <div class="timestamp">🕒 ${timeAgo}</div>
                         </div>
                         <div class="footer-right">
                             ${whisper.is_sensitive ? '<div class="sensitive-badge">⚠️ SENSITIVE</div>' : ''}
@@ -1269,7 +1298,7 @@
             });
         }
 
-        // Reveal sensitive content - FIXED VERSION
+        // Reveal sensitive content
         function revealSensitiveContent(id) {
             revealedSensitiveCards.add(id);
             
@@ -1311,7 +1340,7 @@
             // Update full view header topic
             document.getElementById('full-topic-badge').textContent = formatTopicName(whisper.topic);
 
-            // Update timestamp
+            // Update timestamp - FIXED
             document.getElementById('full-timestamp').textContent = formatTimeAgo(whisper.created_at);
 
             // Update replies count
@@ -1557,13 +1586,14 @@
                     submitWhisperBtn.style.background = '';
                 }, 2000);
                 
-                // Auto-reload will pick up the new whisper in 2 seconds
+                // Refresh whispers to show the new post
+                fetchWhispers(currentTopic);
             } else {
                 alert('Failed to post whisper: ' + result.error);
             }
         });
 
-        // Topic filter - Fixed to properly filter by topic
+        // Topic filter
         topicFilter.addEventListener('click', (e) => {
             if (e.target.classList.contains('topic-filter-btn') && !e.target.classList.contains('more-button')) {
                 const topic = e.target.dataset.topic;

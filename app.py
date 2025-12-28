@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 import json
 from pathlib import Path
 import os
@@ -20,8 +20,8 @@ FRONTEND_DIR.mkdir(exist_ok=True)
 WHISPERS_FILE = FRONTEND_DIR / 'whispers.json'
 REPLIES_FILE = FRONTEND_DIR / 'replies.json'
 
-# Global variable to track last update time - FIXED datetime warning
-LAST_UPDATE_TIME = datetime.now(timezone.utc)
+# Global variable to track last update time
+LAST_UPDATE_TIME = datetime.utcnow()
 
 # ----------------------------------------------------------
 # 2. CREATE EMPTY JSON FILES IF THEY DON'T EXIST
@@ -57,7 +57,7 @@ def save_data(file_path, data):
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
         global LAST_UPDATE_TIME
-        LAST_UPDATE_TIME = datetime.now(timezone.utc)  # Update timestamp - FIXED
+        LAST_UPDATE_TIME = datetime.utcnow()  # Update timestamp
         return True
     except Exception as e:
         print(f'save_data error: {e}')
@@ -66,11 +66,11 @@ def save_data(file_path, data):
 def cleanup_old_whispers():
     try:
         whispers = load_data(WHISPERS_FILE)
-        cutoff_time = datetime.now(timezone.utc) - timedelta(hours=48)  # FIXED
+        cutoff_time = datetime.utcnow() - timedelta(hours=48)
         filtered_whispers, deleted_ids = [], []
 
         for w in whispers:
-            if datetime.fromisoformat(w['created_at'].replace('Z', '+00:00')) > cutoff_time:
+            if datetime.fromisoformat(w['created_at']) > cutoff_time:
                 filtered_whispers.append(w)
             else:
                 deleted_ids.append(w['id'])
@@ -96,16 +96,18 @@ cleanup_thread = threading.Thread(target=auto_cleanup, daemon=True)
 cleanup_thread.start()
 
 # ----------------------------------------------------------
-# 4. STATIC FRONT-END ROUTES - SIMPLIFIED
+# 4. STATIC FRONT-END ROUTES
 # ----------------------------------------------------------
 @app.route('/')
-def serve_index():
+def serve_landing():
+    return send_from_directory(FRONTEND_DIR, 'landingpage.html')
+
+@app.route('/index')
+def serve_board():
     return send_from_directory(FRONTEND_DIR, 'index.html')
 
 @app.route('/<path:path>')
 def serve_static_files(path):
-    if path == '':
-        path = 'index.html'
     return send_from_directory(FRONTEND_DIR, path)
 
 # ----------------------------------------------------------
@@ -118,30 +120,28 @@ def get_whispers():
         topic = request.args.get('topic', 'all')
         whispers = load_data(WHISPERS_FILE)
         
-        # FIXED: Proper topic filtering
+        # Filter whispers by topic (if not 'all')
         if topic and topic != 'all':
             # Ensure topic is valid
             if topic not in ALL_TOPICS:
                 topic = 'all'
-            
-            # Filter whispers by topic - FIXED
-            filtered_whispers = []
-            for w in whispers:
-                # Ensure whisper has topic field, default to 'random' if missing
-                whisper_topic = w.get('topic', 'random')
-                if whisper_topic == topic:
-                    filtered_whispers.append(w)
-            
-            whispers = filtered_whispers
+            else:
+                # Filter whispers by topic
+                filtered_whispers = []
+                for w in whispers:
+                    whisper_topic = w.get('topic', 'random')
+                    if whisper_topic == topic:
+                        filtered_whispers.append(w)
+                
+                whispers = filtered_whispers
         
         whispers.sort(key=lambda x: x['created_at'], reverse=True)
         
-        # Return last update time for frontend to detect changes
         return jsonify({
             'success': True, 
             'data': whispers,
             'last_update': LAST_UPDATE_TIME.isoformat(),
-            'current_topic': topic  # Send back the topic we filtered by
+            'current_topic': topic
         })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -150,18 +150,16 @@ def get_whispers():
 def check_updates():
     """Endpoint for frontend to check if data has changed"""
     last_client_update = request.args.get('last_update')
-    client_topic = request.args.get('topic', 'all')  # Get current topic from client
+    client_topic = request.args.get('topic', 'all')
     
     try:
-        # Get current whispers to see if anything changed
         whispers = load_data(WHISPERS_FILE)
         
-        # Apply topic filtering for checking updates too
+        # Filter by topic for count
         if client_topic and client_topic != 'all':
             if client_topic not in ALL_TOPICS:
                 client_topic = 'all'
             else:
-                # Filter whispers by topic
                 filtered_whispers = []
                 for w in whispers:
                     whisper_topic = w.get('topic', 'random')
@@ -171,7 +169,7 @@ def check_updates():
         else:
             current_count = len(whispers)
         
-        # Check if data has changed since client's last update
+        # Check if data has changed
         if last_client_update:
             try:
                 client_time = datetime.fromisoformat(last_client_update.replace('Z', '+00:00'))
@@ -224,7 +222,7 @@ def create_whisper():
         'topic': topic,
         'is_sensitive': data.get('is_sensitive', False),
         'replies_count': 0,
-        'created_at': datetime.now(timezone.utc).isoformat()  # FIXED
+        'created_at': datetime.utcnow().isoformat()
     }
     
     whispers.append(whisper)
@@ -256,7 +254,7 @@ def create_reply(id):
         'id': new_id,
         'whisper_id': id,
         'content': data['content'].strip(),
-        'created_at': datetime.now(timezone.utc).isoformat()  # FIXED
+        'created_at': datetime.utcnow().isoformat()
     }
     
     replies.append(reply)
